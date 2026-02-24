@@ -18,6 +18,7 @@
 #include "h264_slice_layer_without_partitioning_rbsp_parser.h"
 #include "h264_sps_parser.h"
 #include "h264_subset_sps_parser.h"
+#include "h264_sei_parser.h"
 
 namespace h264nal {
 
@@ -88,7 +89,7 @@ H264NalUnitPayloadParser::ParseNalUnitPayload(
       break;
     }
     case SEI_NUT:
-      // unimplemented
+      nal_unit_payload->sei = H264SeiParser::ParseSei(bit_buffer, bitstream_parser_state);
       break;
     case SPS_NUT: {
       // seq_parameter_set_rbsp()

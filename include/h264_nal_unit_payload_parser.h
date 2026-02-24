@@ -17,6 +17,7 @@
 #include "h264_slice_layer_without_partitioning_rbsp_parser.h"
 #include "h264_sps_parser.h"
 #include "h264_subset_sps_parser.h"
+#include "h264_sei_parser.h"
 #include "rtc_common.h"
 
 namespace h264nal {
@@ -51,6 +52,9 @@ class H264NalUnitPayloadParser {
     std::unique_ptr<
         struct H264SliceLayerExtensionRbspParser::SliceLayerExtensionRbspState>
         slice_layer_extension_rbsp;
+    std::unique_ptr<
+        struct H264SeiParser::SeiState>
+        sei;
   };
 
   // Unpack RBSP and parse NAL unit payload state from the supplied buffer.

@@ -1,7 +1,7 @@
 # add executable
 #add_executable(main main.cc)
 
-option(H264NAL_SMALL_FOOTPRINT, "xmall footprint build")
+option(H264NAL_SMALL_FOOTPRINT, "small footprint build")
 
 if(H264NAL_SMALL_FOOTPRINT)
   message(STATUS "src: small footprint selected")
@@ -39,6 +39,7 @@ if(H264NAL_SMALL_FOOTPRINT)
       h264_nal_unit_header_parser.cc
       h264_nal_unit_payload_parser.cc
       h264_nal_unit_parser.cc
+      h264_sei_parser.cc
 )
 else()
   add_library(h264nal
@@ -70,6 +71,7 @@ else()
       h264_nal_unit_header_parser.cc
       h264_nal_unit_payload_parser.cc
       h264_nal_unit_parser.cc
+      h264_sei_parser.cc
 )
 endif()
 
