@@ -4,13 +4,28 @@
 cmake_minimum_required(VERSION 3.10)
 
 # https://cmake.org/cmake/help/v3.0/command/project.html
-project(h264nal VERSION 0.25)
+project(h264nal VERSION 0.27)
 
 # std::make_ptr requires C++14
 set(CMAKE_CXX_STANDARD 14)
 
-# set up clang-tidy
-set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-format-style='google'")
+# clang-tidy: run as "make tidy" (not part of the normal build)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+find_program(CLANG_TIDY_EXE NAMES clang-tidy)
+if(CLANG_TIDY_EXE)
+  file(GLOB_RECURSE ALL_CXX_SOURCES
+    ${CMAKE_SOURCE_DIR}/src/*.cc
+    ${CMAKE_SOURCE_DIR}/include/*.h
+  )
+  add_custom_target(tidy
+    COMMAND ${CLANG_TIDY_EXE}
+      -p ${CMAKE_BINARY_DIR}
+      -format-style='google'
+      ${ALL_CXX_SOURCES}
+    COMMENT "Running clang-tidy..."
+    VERBATIM
+  )
+endif()
 if(WIN32)
   # Designated initializers throughout project requires C++20 on windows
   set(CMAKE_CXX_STANDARD 20)
@@ -33,21 +48,39 @@ set(CMAKE_C_FLAGS_DEBUG "${COMMON_DEBUG_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${COMMON_DEBUG_FLAGS}")
 
 
-# Recurse into source code subdirectories.
-add_subdirectory(src)
-add_subdirectory(tools)
-option(BUILD_TESTS "Build h264 gtests" ON)
-if(BUILD_TESTS)
-  enable_testing()
-  add_subdirectory(test)
-endif()
-
 # Ensure CMake honors normal variable values when calling option()
 if(POLICY CMP0077)
   cmake_policy(SET CMP0077 NEW)
 endif()
-option(BUILD_CLANG_FUZZER "Build clang fuzzer sanitizer targets" ON)
+
+# Recurse into source code subdirectories.
+add_subdirectory(src)
+add_subdirectory(tools)
+option(BUILD_H264_TESTS "Build h264 gtests" ON)
+if(BUILD_H264_TESTS)
+  enable_testing()
+  add_subdirectory(test)
+endif()
+
+option(BUILD_CLANG_FUZZER "Build clang fuzzer sanitizer targets" OFF)
 
 if(BUILD_CLANG_FUZZER)
+  if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    message(FATAL_ERROR "BUILD_CLANG_FUZZER requires Clang (found ${CMAKE_CXX_COMPILER_ID})")
+  endif()
   add_subdirectory(fuzz)
 endif()
+
+# install targets
+include(GNUInstallDirs)
+install(TARGETS h264nal
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+install(TARGETS h264nal-bin
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+install(DIRECTORY include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/h264nal
+    FILES_MATCHING PATTERN "*.h"
+)

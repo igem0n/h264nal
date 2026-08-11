@@ -160,6 +160,11 @@ std::shared_ptr<H264PpsParser::PpsState> H264PpsParser::ParsePps(
               pps->slice_group_change_rate_minus1)) {
         return nullptr;
       }
+      // guard against overflow: UINT32_MAX + 1 wraps to 0, causing
+      // division by zero in slice header parsing
+      if (pps->slice_group_change_rate_minus1 == UINT32_MAX) {
+        return nullptr;
+      }
 
     } else if (pps->slice_group_map_type == 6) {
       // pic_size_in_map_units_minus1  ue(v)
@@ -446,13 +451,13 @@ void H264PpsParser::PpsState::fdump(FILE* outfp, int indent_level) const {
   fprintf(outfp, "weighted_bipred_idc: %u", weighted_bipred_idc);
 
   fdump_indent_level(outfp, indent_level);
-  fprintf(outfp, "pic_init_qp_minus26: %u", pic_init_qp_minus26);
+  fprintf(outfp, "pic_init_qp_minus26: %i", pic_init_qp_minus26);
 
   fdump_indent_level(outfp, indent_level);
-  fprintf(outfp, "pic_init_qs_minus26: %u", pic_init_qs_minus26);
+  fprintf(outfp, "pic_init_qs_minus26: %i", pic_init_qs_minus26);
 
   fdump_indent_level(outfp, indent_level);
-  fprintf(outfp, "chroma_qp_index_offset: %u", chroma_qp_index_offset);
+  fprintf(outfp, "chroma_qp_index_offset: %i", chroma_qp_index_offset);
 
   fdump_indent_level(outfp, indent_level);
   fprintf(outfp, "deblocking_filter_control_present_flag: %u",
@@ -512,7 +517,7 @@ void H264PpsParser::PpsState::fdump(FILE* outfp, int indent_level) const {
   fprintf(outfp, "delta_scale: %i", delta_scale);
 
   fdump_indent_level(outfp, indent_level);
-  fprintf(outfp, "second_chroma_qp_index_offset: %u",
+  fprintf(outfp, "second_chroma_qp_index_offset: %i",
           second_chroma_qp_index_offset);
 
   indent_level = indent_level_decr(indent_level);

@@ -107,7 +107,6 @@ enum ProfileType : uint8_t {
   CAVLC_444_INTRA = 17,
 };
 
-enum ProfileType getProfileType();
 void profileTypeToString(enum ProfileType profile, std::string& str);
 
 // Table G-1
@@ -167,7 +166,7 @@ class NaluChecksum {
   void fdump(char* output, int output_len) const;
   const char* GetChecksum() { return checksum; }
   int GetLength() { return length; }
-  const char* GetPrintableChecksum() const;
+  std::string GetPrintableChecksum() const;
 
  private:
   char checksum[kMaxLength];

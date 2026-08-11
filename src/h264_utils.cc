@@ -45,13 +45,25 @@ int H264Utils::ReadFile(const char* filename, std::vector<uint8_t>& buffer) {
   }
   fseek(infp, 0, SEEK_END);
   int64_t size = ftell(infp);
+  if (size <= 0) {
+    fprintf(stderr, "Could not determine file size: \"%s\"\n", filename);
+    fclose(infp);
+    return -1;
+  }
   fseek(infp, 0, SEEK_SET);
   // read file into buffer
   buffer.resize(static_cast<size_t>(size));
-  fread(reinterpret_cast<char*>(buffer.data()), 1, static_cast<size_t>(size),
-        infp);
+  size_t bytes_read = fread(reinterpret_cast<char*>(buffer.data()), 1,
+                            static_cast<size_t>(size), infp);
   // clean up
   fclose(infp);
+  if (bytes_read != static_cast<size_t>(size)) {
+    fprintf(stderr,
+            "Could not read entire file: \"%s\" "
+            "(read %zu of %zu bytes)\n",
+            filename, bytes_read, static_cast<size_t>(size));
+    return -1;
+  }
   return 0;
 }
 
