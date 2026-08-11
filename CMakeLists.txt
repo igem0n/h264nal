@@ -6,8 +6,8 @@ cmake_minimum_required(VERSION 3.10)
 # https://cmake.org/cmake/help/v3.0/command/project.html
 project(h264nal VERSION 0.27)
 
-# std::make_ptr requires C++14
-set(CMAKE_CXX_STANDARD 14)
+# std::to_array requires C++20
+set(CMAKE_CXX_STANDARD 20)
 
 # clang-tidy: run as "make tidy" (not part of the normal build)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -25,17 +25,6 @@ if(CLANG_TIDY_EXE)
     COMMENT "Running clang-tidy..."
     VERBATIM
   )
-endif()
-if(WIN32)
-  # Designated initializers throughout project requires C++20 on windows
-  set(CMAKE_CXX_STANDARD 20)
-  if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++20")
-  else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
-  endif()
-else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif()
 
 # Set debug flags for both C and C++
