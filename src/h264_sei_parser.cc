@@ -108,7 +108,6 @@ std::unique_ptr<H264SeiDataParser::PicTimingState> H264SeiDataParser::ParsePicTi
     result->num_clock_ts = sei_num_clock_ts_table[result->pic_struct];
 
     for (size_t i = 0; i < result->num_clock_ts; ++i) {
-      uint64_t readBuf = 0;
       if(!bit_buffer->ReadBits(1, readBuf)) {
         return nullptr;
       }
